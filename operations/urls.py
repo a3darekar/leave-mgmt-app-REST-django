@@ -15,8 +15,9 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-from .views import home
+from .views import home, signup
 
 urlpatterns = [
 	url(r'^$', home, name='home'),
+    url(r'^signup/', signup, name='signup'),
 ]
