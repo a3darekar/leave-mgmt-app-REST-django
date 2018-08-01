@@ -22,6 +22,9 @@ urlpatterns = [
 	url(r'^admin/', admin.site.urls),
 	url(r'^login/$', views.login, name='login'),
 	url(r'^logout/$', views.logout, name='logout'),
+	url(r'^rest-auth/', include('rest_auth.urls')),
+	url(r'^api/login/', include('rest_social_auth.urls_session')),
+	url(r'^api/login/', include('rest_social_auth.urls_token')),
 	url(r'^auth/', include('social_django.urls', namespace='social')),
 	url(r'^', include('operations.urls')),
 ]
