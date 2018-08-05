@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <h2>Settings</h2>
+
+  <h3>google-oauth2</h3>
+  {% if google_oauth2_login %}
+    <p>Connected as <a href="https://github.com/{{ github_login.extra_data.login }}/" target="_blank">{{ github_login.extra_data.login }}</a></p>
+    {% if can_disconnect %}
+      <form method="post" action="{% url 'social:disconnect' 'google-oauth2' %}">
+        {% csrf_token %}
+        <button type="submit">Disconnect from google-oauth2</button>
+      </form>
+    {% else %}
+      <button type="button" disabled>Disconnect from google-oauth2</button>
+      <p style="color: red">You must <a href="{% url 'password' %}">define a password</a> for your account before disconnecting from Google_oauth.</p>
+    {% endif %}
+  {% else %}
+    <a href="{% url 'social:begin' 'google-oauth2' %}">Connect to google-oauth2</a>
+  {% endif %}
+
+{% endblock content %}

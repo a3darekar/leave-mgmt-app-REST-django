@@ -40,7 +40,7 @@ class LeavesRemainAdmin(admin.ModelAdmin):
 	list_filter = ['employee', ('leavetype', AllValuesFieldListFilter)]
 
 class DepartmentAdmin(admin.ModelAdmin):
-	list_display = ('name', 'Head')
+	list_display = ('name', 'head')
 
 admin.site.unregister(Group)
 admin.site.register(Employee, EmployeeAdmin)

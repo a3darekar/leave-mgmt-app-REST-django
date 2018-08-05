@@ -12,7 +12,7 @@ from django.db import models
 
 class Department(models.Model):
 	name 		= models.CharField(max_length=25, default="HR")
-	Head		= models.ForeignKey(User)
+	head		= models.ForeignKey(User)
 
 	def __str__(self):
 		return self.name
@@ -20,6 +20,7 @@ class Department(models.Model):
 	class Meta:
 		verbose_name 		= ('Department')
 		verbose_name_plural = ('Departments')
+
 
 class Employee(models.Model):
 	user 		= models.OneToOneField(User, help_text="Create a new user to add as an employee. This would be used as login credentials.")
