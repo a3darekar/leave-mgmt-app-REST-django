@@ -43,7 +43,7 @@ def settings(request):
 		google_oauth2_login = user.social_auth.get(provider='google-oauth2')
 	except UserSocialAuth.DoesNotExist:
 		google_oauth2_login = None
-	
+
 	can_disconnect = (user.social_auth.count() > 1 or user.has_usable_password())
 
 	return render(request, 'settings.html', {
@@ -64,7 +64,7 @@ def password(request):
 			form.save()
 			update_session_auth_hash(request, form.user)
 			messages.success(request, 'Your password was successfully updated!')
-			return redirect('password')
+			return redirect('settings')
 		else:
 			messages.error(request, 'Please correct the error below.')
 	else:

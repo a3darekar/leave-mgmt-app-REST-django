@@ -1,14 +1,67 @@
 {% extends "layout.html" %}
+{% load static %}
+
+{% block title %}
+	 | Login
+{% endblock %}
+
+{% block css %}
+	<link rel="stylesheet" href="{% static 'css/social_btn.css' %}">
+	<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
 
 
 {% block content %}
-  <h2>Login</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Login</button>
-  </form>
-   <br>
-  <p><strong>-- OR --</strong></p>
-  <a href="{% url 'social:begin' 'google-oauth2' %}">Login with Google</a><br>
+
+		<div class="main_div"><br>
+			<p>
+			<p>Welcome to Leave Management System</p>														<br>
+		</div>
+			{% if form.errors %}
+				<div class="errors">
+					<p class="lb-lg label label-danger">
+						Your username and password didn't match. 
+						Please try again.
+					</p>
+				</div>
+			{% endif %}
+		<div class="div1">
+			<div class="div2">
+				<label>Please Sign In</label>
+			</div>
+			<div class="div3">
+				<form id="login-form" method="post" action="{% url 'login' %}">
+					{% csrf_token %}
+				{% for field in form %}
+					<label for="{{ field.id_for_label }}">{{ field.label }}</label>												
+					<input class="form-control" id="{{ field.id_for_label }}" name="{{ field.html_name }}" placeholder="Enter {{ field.label }}" {% if field.name == "password" %} type="password" {% endif %} /> 
+				{% endfor %}					
+				<br>
+				<input class="btn btn-primary btn-sm btn-block" type="submit" value="Log in" />
+				<input type="hidden" name="next" value="{{ next }}" />
+				</form>
+			</div>
+			<div class="div2_bottom div2">
+				<label>
+					<a href="{% url 'signup' %}">Sign Up</a>
+				</label>
+				<br>
+				<label>
+					<a href="{% url 'social:begin' 'google-oauth2' %}">
+						<button class="loginBtn loginBtn--google">
+  							Login with Google
+						</button>
+					</a>
+				</label>
+			</div>
+			<div class="div2">
+				<label>
+					<a href="{% url 'admin:index' %}">Administrative Login</a>
+				</label>
+			</div>
+
+		</div>
+
+
 {% endblock %}

@@ -17,7 +17,6 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.contrib.auth import views
 
-
 urlpatterns = [
 	url(r'^admin/', admin.site.urls),
 	url(r'^login/$', views.login, name='login'),
@@ -28,3 +27,4 @@ urlpatterns = [
 	url(r'^auth/', include('social_django.urls', namespace='social')),
 	url(r'^', include('operations.urls')),
 ]
+

@@ -108,12 +108,23 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 AUTHENTICATION_BACKENDS = (
-	'social_core.backends.open_id.OpenIdAuth',
-	'social_core.backends.google.GoogleOpenId',
 	'social_core.backends.google.GoogleOAuth2',
-
 	'django.contrib.auth.backends.ModelBackend',
+	'operations.backends.EmailBackend',
 )
+
+SOCIAL_AUTH_PIPELINE = (
+    'social_core.pipeline.social_auth.social_details',
+    'social_core.pipeline.social_auth.social_uid',
+    'social_core.pipeline.social_auth.social_user',
+    'social_core.pipeline.user.get_username',
+    'social_core.pipeline.user.create_user',
+    'social_core.pipeline.social_auth.associate_user',
+    'social_core.pipeline.social_auth.load_extra_data',
+    'social_core.pipeline.user.user_details',
+    'social_core.pipeline.social_auth.associate_by_email',
+)
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
@@ -142,5 +153,8 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '' #Paste Secret Key
 
 SOCIAL_AUTH_LOGIN_ERROR_URL = '/settings/'
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/settings/'
+
+SOCIAL_AUTH_PROTECTED_USER_FIELDS = ['email',]
+SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ['username', 'first_name', 'email']
 
 from local_settings import *

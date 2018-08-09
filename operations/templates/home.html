@@ -1,12 +1,42 @@
 {% extends "layout.html" %}
 
+
+
+{% load static %}
+
+{% block title %}
+	 | Settings
+{% endblock %}
+
+{% block css %}
+
+	<link rel="stylesheet" href="{% static 'css/default.css' %}">
+{% endblock %}
+
+
+
+		<div class="main_div"><br>
+			<p>
+			<p>Welcome to Leave Management System</p>														<br>
+		</div>
+			{% if form.errors %}
+				<div class="errors">
+					<p class="lb-lg label label-danger">
+						Your username and password didn't match. 
+						Please try again.
+					</p>
+				</div>
+			{% endif %}
+
 {% block content %}
 	{% if user.is_authenticated %}
 		<h2 class="display-4">Hello, {{ emp.first_name }} {{ emp.last_name }}</h2>
 		{% for leave in leaves %}
 			<p>{{ leave.leavetype }} : <b>{{leave.count}}</b></p>
 		{% endfor %}
-  
+
+
+		<a href="{% url 'settings' %}">Settings</a>
 		<a href="{% url 'logout' %}">Logout</a>
 		
 	{% else %}
