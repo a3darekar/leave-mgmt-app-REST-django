@@ -1,25 +1,10 @@
-"""sdl_app URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/1.11/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  url(r'^$', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.conf.urls import url, include
-    2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
-"""
 from django.conf.urls import url, include
-from django.contrib import admin
-from .views import home, signup, settings, password
+from .views import *
+from .serializers import router
+from django.views.generic import TemplateView
 
 urlpatterns = [
 	url(r'^$', home, name='home'),
-    url(r'^signup/', signup, name='signup'),
-    url(r'^settings/$', settings, name='settings'),
-    url(r'^settings/password/$', password, name='password'),
+    url(r'^api/', include((router.urls, 'rest-operations'))),
+    url(r'^privacy_policy', TemplateView.as_view(template_name='privacy_policy.html'), name='privacy'),
 ]

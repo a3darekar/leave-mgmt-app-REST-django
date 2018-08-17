@@ -24,7 +24,7 @@ SECRET_KEY = 'j#a+xm_@oiv#9czd%o)l57a@(e9ntj4as_o(5tx)ch0k$*1!3c'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -36,11 +36,14 @@ INSTALLED_APPS = [
 	'django.contrib.sessions',
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
+
 	'operations',
-	'rest_auth',
-	'social_django',
+	'authapp',
+
 	'rest_framework',
-	'rest_social_auth',  # this package 
+	'rest_framework.authtoken',  # only if you use token authentication
+	'social_django',
+	'rest_social_auth',  
 ]
 
 MIDDLEWARE = [
@@ -109,20 +112,20 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTHENTICATION_BACKENDS = (
 	'social_core.backends.google.GoogleOAuth2',
+	'social_core.backends.facebook.FacebookOAuth2',
 	'django.contrib.auth.backends.ModelBackend',
 	'operations.backends.EmailBackend',
 )
 
 SOCIAL_AUTH_PIPELINE = (
-    'social_core.pipeline.social_auth.social_details',
-    'social_core.pipeline.social_auth.social_uid',
-    'social_core.pipeline.social_auth.social_user',
-    'social_core.pipeline.user.get_username',
-    'social_core.pipeline.user.create_user',
-    'social_core.pipeline.social_auth.associate_user',
-    'social_core.pipeline.social_auth.load_extra_data',
-    'social_core.pipeline.user.user_details',
-    'social_core.pipeline.social_auth.associate_by_email',
+	'social_core.pipeline.social_auth.social_details',
+	'social_core.pipeline.social_auth.social_uid',
+	'social_core.pipeline.social_auth.social_user',
+	'social_core.pipeline.user.create_user',
+	'social_core.pipeline.social_auth.associate_user',
+	'social_core.pipeline.social_auth.load_extra_data',
+	'social_core.pipeline.user.user_details',
+	'social_core.pipeline.social_auth.associate_by_email',
 )
 
 
@@ -146,15 +149,22 @@ LOGIN_REDIRECT_URL = 'home'
 
 STATIC_URL = '/static/'
 
+LOGIN_URL = 'login'
+LOGOUT_URL = 'logout'
 LOGOUT_REDIRECT_URL = '/'
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY =''  #Paste CLient Key
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '' #Paste Secret Key
 
-SOCIAL_AUTH_LOGIN_ERROR_URL = '/settings/'
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/settings/'
+SOCIAL_AUTH_FACEBOOK_OAUTH2_KEY =''  #Paste CLient Key
+SOCIAL_AUTH_FACEBOOK_OAUTH2_SECRET = '' #Paste Secret Key
 
 SOCIAL_AUTH_PROTECTED_USER_FIELDS = ['email',]
 SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ['username', 'first_name', 'email']
 
-from local_settings import *
+
+SECURE_SSL_REDIRECT = True
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+from .local_settings import *

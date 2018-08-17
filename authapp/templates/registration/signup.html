@@ -37,7 +37,7 @@
 					{% csrf_token %}
 				{% for field in form %}
 					<label for="{{ field.id_for_label }}">{{ field.label }}</label>                       
-					<input class="form-control" id="{{ field.id_for_label }}" name="{{ field.html_name }}" placeholder="Enter {{ field.label }}" {% if field.name == "password" %} type="password" {% endif %} /> 
+					<input class="form-control" id="{{ field.id_for_label }}" name="{{ field.html_name }}" placeholder="Enter {{ field.label }}" {% if field.name == "password1" or  field.name == "password2" %} type="password" {% endif %} /> 
 				{% endfor %}          
 				<br>
 				<input class="btn btn-primary btn-sm btn-block" type="submit" value="Sign Up" />
@@ -52,7 +52,15 @@
 				<label>
 					<a href="{% url 'social:begin' 'google-oauth2' %}">
 						<button class="loginBtn loginBtn--google">
-  							Login with Google
+  							Sign up with Google
+						</button>
+					</a>
+				</label>
+				<br>
+				<label>
+					<a href="{% url 'social:begin' 'facebook' %}">
+						<button class="loginBtn loginBtn--facebook">
+  							Sign up with Facebook
 						</button>
 					</a>
 				</label>

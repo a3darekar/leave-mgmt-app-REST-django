@@ -82,9 +82,9 @@ class LeaveRecord(models.Model):
 	leavetype 			= models.CharField('Leave Type', max_length=25, choices = LeaveType)			
 	status				= models.CharField(max_length=25, choices = Status)				
 	reason				= models.CharField(max_length=400, default = "Casual leave")	
-	from_date			= models.DateField(default=datetime.now)						
+	from_date			= models.DateField(default=datetime.now)
 	to_date				= models.DateField(default=datetime.now)
-	days_of_lave_taken	= models.PositiveIntegerField(default=1)						
+	days_of_lave_taken	= models.PositiveIntegerField(default=1)
 	submit_date			= models.DateField(default=datetime.now)
 	available			= models.PositiveIntegerField(default=0)
 	excess				= models.BooleanField(default=False)
@@ -104,7 +104,7 @@ class LeaveRecord(models.Model):
 		leavetype 	= dict(LeaveType)
 		status 		= dict(Status)
 		dept 	 	= self.employee.department
-		employee = Employee.objects.get(department = dept, headofdept = True)
+		dept_head 	= Employee.objects.get(user=Department.objects.get(id=dept.id).head)
 		if self.pk:
 			if self.status ==  status['approved']:
 				self.status = status['approved']

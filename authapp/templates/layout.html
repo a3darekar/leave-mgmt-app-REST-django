@@ -1,0 +1,22 @@
+{% load staticfiles %}
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>
+            Welcome to leave Mgmt System
+            {% block title %}
+            {% endblock %}
+        </title>
+        <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <link rel="stylesheet" href="{% static 'css/font-awesome-4.0.3.css' %}">
+        {% block css %}
+
+        {% endblock %}        
+    </head>
+    <body>
+        {% block content %}
+
+        {% endblock %}
+    </body>
+</html>
