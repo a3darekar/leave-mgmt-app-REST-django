@@ -11,19 +11,23 @@ from django.db import models
 # Create your models here.
 
 class Department(models.Model):
-	name 		= models.CharField(max_length=25, default="HR")
-	head		= models.ForeignKey(User)
+	name 		= models.CharField(max_length = 25, default = "HR")
+	head		= models.ForeignKey(User, related_name = "headofdept")
 
 	def __str__(self):
 		return self.name
 
+	def __unicode__(self):
+		return self.name
+
 	class Meta:
+		unique_together 	= (('name','head'))
 		verbose_name 		= ('Department')
 		verbose_name_plural = ('Departments')
 
 
 class Employee(models.Model):
-	user 		= models.OneToOneField(User, help_text="Create a new user to add as an employee. This would be used as login credentials.")
+	user 		= models.OneToOneField(User, help_text="Create a new user to add as an employee. This would be used as login credentials.", related_name="employee")
 	email 		= models.EmailField(('email address'), unique=True)
 	department 	= models.OneToOneField(Department, help_text="Assingn Department (or project to user, The Dept Head defined in Department Table would be the person managing the records of specific employee.")
 	first_name 	= models.CharField(('first name'), max_length=30, blank=True)
@@ -86,7 +90,6 @@ class LeaveRecord(models.Model):
 	to_date				= models.DateField(default=datetime.now)
 	days_of_lave_taken	= models.PositiveIntegerField(default=1)
 	submit_date			= models.DateField(default=datetime.now)
-	available			= models.PositiveIntegerField(default=0)
 	excess				= models.BooleanField(default=False)
 	
 	class Meta:
@@ -101,13 +104,14 @@ class LeaveRecord(models.Model):
 			print(e)
 
 	def save(self):
-		leavetype 	= dict(LeaveType)
-		status 		= dict(Status)
-		dept 	 	= self.employee.department
-		dept_head 	= Employee.objects.get(user=Department.objects.get(id=dept.id).head)
 		if self.pk:
+			leavetype 	= dict(LeaveType)
+			status 		= dict(Status)
+			dept 	 	= self.employee.department
+			dept_head 	= Employee.objects.get(user=Department.objects.get(id=dept.id).head)
 			if self.status ==  status['approved']:
 				self.status = status['approved']
+				print self.leavetype
 				# self.notify(to = str(self.employee.contact), from_ = phone_number, body="Your Leave submitted on" + str(self.submit_date) + " is Approved.")
 				leavesremain 	= LeavesRemain.objects.get(leavetype = self.leavetype, employee = self.employee)
 				self.available 	= leavesremain.count

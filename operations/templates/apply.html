@@ -1,0 +1,83 @@
+{% extends 'layout.html' %}
+
+	{% block title %} 
+		| apply
+	{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+{% if form.errors %}
+{{form.errors}}
+{% endif %}
+
+{% if user.is_authenticated %}
+		<h2 class="display-4">Hello {{ employee }}</h2>
+		{% for leave in leaves %}
+			<p>{{ leave.leavetype }} : <b>{{leave.count}}</b></p>
+		{% endfor %}
+
+		<a href="{% url 'settings' %}">Settings</a>
+		<a href="{% url 'logout' %}">Logout</a>
+		
+	{% else %}
+		<a href="{% url 'settings' %}">Settings</a>
+		<a class="lead" href="{% url 'login' %}">Log in</a>
+		<a class="lead" href="{% url 'signup' %}">Sign Up</a>
+	{% endif %}
+
+
+{% if next %}
+	{% if user.is_authenticated %}
+	<p>Your account doesn't have access to this page. To proceed,
+	please login with an account that has access.</p>
+	{% else %}
+	<p>Please login to see this page.</p>
+	{% endif %}
+{% endif %}
+<form method="post" action="{% url 'apply' %}">
+	{% csrf_token %}				
+	<h4>Casual Leave Form</h4>
+	{{ form.as_p }}
+						<center>  
+							<input type="hidden" name="leavetype" value="{{type}}" />
+							<input class="btn btn-success btn-sm" type="submit" value="Submit" />
+						</center>
+
+
+{% if leave_records %}
+
+<hr>
+
+<table class="table table-border center tr-hower">
+	<tr class="tr-border">
+		<th class="th-border" rowspan="2" style="text-align : center" scope="row">Id</th>
+		<th class="th-border" colspan="3" style="text-align : center" >Description </th>
+		<th class="th-border" rowspan="2" style="text-align : center" scope="row">Reason</th>
+		<th class="th-border" rowspan="2" style="text-align : center" scope="row">Status</th>
+	</tr>
+		
+	<tr>
+		<th>From</th>
+		<th>To</th>
+		<th>Total No of days</th>
+	</tr>
+		{% for leave_record in leave_records %}
+		
+		<tr class="tr-border" {% if leave_record.excess is True %} bgcolor="#999999" {% endif %}> 
+			<td class="td-border">{{ forloop.counter }}</td>
+			<td class="td-border">{{ leave_record.from_date }}</td>
+			<td class="td-border">{{ leave_record.to_date }}</td>
+			<td class="td-border">{{ leave_record.days_of_lave_taken }}</td>
+			<td class="td-border">{{ leave_record.reason }}</td>
+			<td class="td-border">{{ leave_record.status }}</td>
+		</tr>
+
+		{% endfor %}
+</table>
+<hr>
+
+{% endif %}
+
+{% endblock content %}

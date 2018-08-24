@@ -1,0 +1,72 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+	 | Approve
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+	{% if user.is_authenticated %}
+		<h2 class="display-4">Hello, {{ emp.first_name }} {{ emp.last_name }}</h2>
+		{% for leave in leaves %}
+			<p>{{ leave.leavetype }} : <b>{{leave.count}}</b></p>
+		{% endfor %}
+
+		<a href="{% url 'settings' %}">Settings</a>
+		<a href="{% url 'logout' %}">Logout</a>
+		
+	{% else %}
+		<a href="{% url 'settings' %}">Settings</a>
+		<a class="lead" href="{% url 'login' %}">Log in</a>
+		<a class="lead" href="{% url 'signup' %}">Sign Up</a>
+	{% endif %}
+
+
+<hr>
+
+{% if leave_records %}
+<table class="table table-border center tr-hower">
+	<tr class="tr-border">
+		<th class="th-border" rowspan="2" style="text-align : center" scope="row">Id</th>
+		<th class="th-border" colspan="3" style="text-align : center" >Description </th>
+		<th class="th-border" rowspan="2" style="text-align : center" scope="row">Reason</th>
+		<th class="th-border" rowspan="2" style="text-align : center" scope="row">Status</th>
+		<th class="th-border" rowspan="2" style="text-align : center" scope="row">Action</th>
+	</tr>
+		
+	<tr>
+		<th>From</th>
+		<th>To</th>
+		<th>Total No of days</th>
+	</tr>
+		{% for leave_record in leave_records %}
+		
+		<tr class="tr-border" {% if leave_record.excess is True %} bgcolor="#999999" {% endif %}> 
+			<td class="td-border">{{ forloop.counter }}</td>
+			<td class="td-border">{{ leave_record.from_date }}</td>
+			<td class="td-border">{{ leave_record.to_date }}</td>
+			<td class="td-border">{{ leave_record.days_of_lave_taken }}</td>
+			<td class="td-border">{{ leave_record.reason }}</td>
+			<td class="td-border">{{ leave_record.status }}</td>
+			<td class="td-border">
+				<form method="post" action="{% url 'approve' %}">
+				{% csrf_token %}
+				<input type="hidden" name="leave_record" value= "{{ leave_record.pk }}"> 
+				<input class = "btn btn-xs btn-success" type="submit" value="Approve" name="Approve">
+				<form method="post" action="{% url 'approve' %}">
+				{% csrf_token %}
+				<input type="hidden" name="leave_record" value= "{{ leave_record.pk }}"> 
+				<input class = "btn btn-xs btn-danger" type="submit" value="Disapprove" name="Disapprove">	
+				</form>
+			</td>
+		</tr>
+
+		{% endfor %}
+</table>
+
+{% else %}
+	<p>No leave records</p>
+{% endif %}
+{% endblock content %}
