@@ -43,7 +43,7 @@ INSTALLED_APPS = [
 	'rest_framework',
 	'rest_framework.authtoken',  # only if you use token authentication
 	'social_django',
-	'rest_social_auth',  
+	'rest_social_auth',
 ]
 
 MIDDLEWARE = [
@@ -70,8 +70,8 @@ TEMPLATES = [
 				'django.template.context_processors.request',
 				'django.contrib.auth.context_processors.auth',
 				'django.contrib.messages.context_processors.messages',
-				'social_django.context_processors.backends',  
-				'social_django.context_processors.login_redirect', 
+				'social_django.context_processors.backends',
+				'social_django.context_processors.login_redirect',
 			],
 		},
 	},
@@ -90,6 +90,11 @@ DATABASES = {
 	}
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -149,9 +154,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_URL = 'logout'
 LOGOUT_REDIRECT_URL = '/'
 
