@@ -8,6 +8,9 @@ from .models import Employee
 from django.http import HttpResponse
 from datetime import date, timedelta
 
+from rest_framework import generics
+from .serializers import EmployeeSerializer
+
 
 @login_required
 def home(request):
