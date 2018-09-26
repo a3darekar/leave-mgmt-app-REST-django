@@ -50,7 +50,9 @@ class LeaveRecordViewSet(viewsets.ModelViewSet):
         if user.is_authenticated:
             employee = Employee.objects.filter(user = user)
             if self.request.query_params.get('status') == 'pending':
-                return LeaveRecord.objects.filter(employee = employee).filter(status = 'pending')
+                records =  LeaveRecord.objects.filter(employee = employee).filter(status = 'pending')
+                print records
+                return records
             return LeaveRecord.objects.filter(employee = employee)
         else:
             return LeaveRecord.objects.none()
