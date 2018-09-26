@@ -37,15 +37,32 @@ class LeaveRecordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LeaveRecord
-        fields = ('employee', 'leavetype', 'status', 'reason', 'from_date', 'to_date', 'days_of_lave_taken', 'submit_date', 'available', 'excess')
+        fields = ('id', 'employee', 'leavetype', 'status', 'reason', 'from_date', 'to_date', 'days_of_lave_taken', 'submit_date', 'excess')
+        read_only_fields = ('employee', 'status', 'days_of_lave_taken', 'submit_date', 'leavetype', 'excess')
 
 class LeaveRecordViewSet(viewsets.ModelViewSet):
     """
     A simple ViewSet for viewing and editing accounts.
     """
-    queryset = LeaveRecord.objects.all()
     serializer_class = LeaveRecordSerializer
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated:
+            employee = Employee.objects.filter(user = user)
+            if self.request.query_params.get('status') == 'pending':
+                return LeaveRecord.objects.filter(employee = employee).filter(status = 'pending')
+            return LeaveRecord.objects.filter(employee = employee)
+        else:
+            return LeaveRecord.objects.none()
+
+
+    def update(self, instance, validated_data):
+        instance.reason = validated_data.get('reason', instance.email)
+        instance.from_date = validated_data.get('from_date', instance.from_date)
+        instance.to_date = validated_data.get('to_date', instance.to_date)
+        return instance
 
 router = DefaultRouter()
 router.register(r'leaves', LeavesRemainViewSet, base_name='leaves_rest')
+router.register(r'emps', LeavesRemainViewSet, base_name='leaves_rest')
 router.register(r'leaverecords', LeaveRecordViewSet, base_name='leaverecords_rest')
