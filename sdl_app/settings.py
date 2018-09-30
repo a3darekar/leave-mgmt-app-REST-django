@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 	'rest_framework.authtoken',  # only if you use token authentication
 	'social_django',
 	'rest_social_auth',
+    'fcm_django',
 ]
 
 MIDDLEWARE = [
@@ -55,6 +56,7 @@ MIDDLEWARE = [
 	'django.contrib.messages.middleware.MessageMiddleware',
 	'django.middleware.clickjacking.XFrameOptionsMiddleware',
 	'social_django.middleware.SocialAuthExceptionMiddleware',
+	'django_currentuser.middleware.ThreadLocalUserMiddleware',
 ]
 
 ROOT_URLCONF = 'sdl_app.urls'

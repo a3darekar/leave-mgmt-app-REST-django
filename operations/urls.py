@@ -9,4 +9,5 @@ urlpatterns = [
     url(r'^privacy_policy', TemplateView.as_view(template_name='privacy_policy.html'), name='privacy'),
     url(r'^apply', apply, name='apply'),
     url(r'^approve', approve, name='approve'),
+    url(r'^webhook', webhook, name='webhook'),
 ]

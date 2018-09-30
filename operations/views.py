@@ -7,9 +7,40 @@ from .forms import LeaveRecordForm
 from .models import Employee
 from django.http import HttpResponse
 from datetime import date, timedelta
-
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
 from .serializers import EmployeeSerializer
+import json
+
+@csrf_exempt
+def webhook(request):
+	if request.method == 'POST':
+		req = json.loads(request.body)
+	try:
+		action = req.get('queryResult').get('action')
+	except AttributeError:
+		return 'json error'
+	print action
+	if action == 'leave.apply':
+		webhook_apply(req)
+	devices = FCMDevice.objects.all()
+	print devices
+	for device in devices:
+		body = device.name + " :- " + device.device_id
+		device.send_message(title="Leave Attempted!", body=body)
+
+	# print('Action: ' + action)
+	# print('Response: ' + res)
+
+	
+
+	return HttpResponse(jsonify({'fulfillmentText': res}))
+
+
+def webhook_apply(request):
+	error, parameters = validate_params(req['queryResult']['parameters'])
+	if error:
+		return error
 
 
 @login_required
@@ -79,7 +110,6 @@ def apply(request):
 				if (instance.from_date + timedelta(days=lday)).weekday() == 6:
 					instance.days_of_lave_taken -=1
 			instance.employee			= Employee.objects.get(user = request.user)
-			instance.status				= status['pending']
 			available_leaves 			= LeavesRemain.objects.filter(employee= instance.employee, leavetype = 'Casual').first().count
 			if available_leaves > 0 and available_leaves > instance.days_of_lave_taken :
 				instance.leavetype 		= 'Casual'

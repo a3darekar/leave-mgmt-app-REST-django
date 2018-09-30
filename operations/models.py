@@ -4,9 +4,11 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.models import User
 from django.utils import six, timezone
 from .choices import LeaveType, Status
-from datetime import datetime
+from datetime import datetime, timedelta
+import pytz
 # from .twillio import *
 from django.db import models
+from django_currentuser.middleware import get_current_authenticated_user
 
 # Create your models here.
 
@@ -86,8 +88,8 @@ class LeaveRecord(models.Model):
 	leavetype 			= models.CharField('Leave Type', max_length=25, choices = LeaveType)			
 	status				= models.CharField(max_length=25, choices = Status)				
 	reason				= models.CharField(max_length=400, default = "Casual leave")	
-	from_date			= models.DateField(default=datetime.now)
-	to_date				= models.DateField(default=datetime.now)
+	from_date			= models.DateField()
+	to_date				= models.DateField()
 	days_of_lave_taken	= models.PositiveIntegerField(default=1)
 	submit_date			= models.DateField(default=datetime.now)
 	excess				= models.BooleanField(default=False)
@@ -103,10 +105,10 @@ class LeaveRecord(models.Model):
 		except TwilioRestException as e:
 			print(e)
 
-	def save(self):
+	def save(self, *args, **kwargs):
+		status 		= dict(Status)
 		if self.pk:
 			leavetype 	= dict(LeaveType)
-			status 		= dict(Status)
 			dept 	 	= self.employee.department
 			dept_head 	= Employee.objects.get(user=Department.objects.get(id=dept.id).head)
 			if self.status ==  status['approved']:
@@ -132,6 +134,34 @@ class LeaveRecord(models.Model):
 			else:
 				pass
 		else:
-			pass
+			self.status = status['pending']
+			self.days_of_lave_taken = (self.to_date - self.from_date).days + 1
+			for lday in range(self.days_of_lave_taken):
+				if (self.from_date + timedelta(days=lday)).weekday() == 6:
+					self.days_of_lave_taken -=1
+
+			user = get_current_authenticated_user()
+			self.employee = Employee.objects.get(user = user)
+			available_leaves 			= LeavesRemain.objects.filter(employee= self.employee, leavetype = 'Casual').first().count
+			if available_leaves > 0 and available_leaves > self.days_of_lave_taken :
+				self.leavetype 		= 'Casual'
+			else:
+				self.leavetype 		= 'Excess'	
+			leaves_records	= LeaveRecord.objects.filter(employee = self.employee, status = 'Approved')
+			utc = pytz.utc
+			print type(self.from_date),type(self.to_date),self.reason
+			if isinstance(self.from_date, datetime) :
+				self.from_date  = utc.localize(self.from_date)
+				self.from_date = self.from_date.date()
+
+			if isinstance(self.to_date, datetime) :
+				self.to_date  = utc.localize(self.to_date)
+				self.to_date = self.to_date.date()
+				
+			for leave_record in leaves_records:
+					d1 	= leave_record.to_date
+					d2 	= leave_record.from_date
+					e1 	= self.from_date
+					e2 	= self.to_date
 			# self.notify(to =str(employee.contact), from_ = phone_number, body="New Leave Request. Log in to Leave Management System to see details.")
 		super(LeaveRecord, self).save()
