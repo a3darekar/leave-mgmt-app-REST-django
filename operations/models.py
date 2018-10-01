@@ -98,12 +98,11 @@ class LeaveRecord(models.Model):
 		verbose_name 		= ('Leave Record')
 		verbose_name_plural = ('Leave Records')
 
-	def notify(self, to, from_, body, *args, **kwargs):
-		try:
-			message = client.messages.create( to = to, from_ = from_, body = body)
-			print(message.sid)
-		except TwilioRestException as e:
-			print(e)
+	def notify(self, to, body, *args, **kwargs):
+		devices = FCMDevice.objects.filter( device_id = to.pk )
+		print devices
+		for device in devices:
+			device.send_message(title="Leave Attempted!", body=body)
 
 	def save(self, *args, **kwargs):
 		status 		= dict(Status)
@@ -114,7 +113,7 @@ class LeaveRecord(models.Model):
 			if self.status ==  status['approved']:
 				self.status = status['approved']
 				print self.leavetype
-				# self.notify(to = str(self.employee.contact), from_ = phone_number, body="Your Leave submitted on" + str(self.submit_date) + " is Approved.")
+				self.notify(to = self.employee, body = "Your Leave submitted on" + str(self.submit_date) + " is Approved.")
 				leavesremain 	= LeavesRemain.objects.get(leavetype = self.leavetype, employee = self.employee)
 				self.available 	= leavesremain.count
 				if leavesremain.count > 0 and leavesremain.count >= self.days_of_lave_taken:
@@ -130,7 +129,7 @@ class LeaveRecord(models.Model):
 			elif self.status == status['disapproved']:
 				leavesremain 	= LeavesRemain.objects.get(leavetype = self.leavetype, employee = self.employee)
 				self.available = leavesremain.count
-				# self.notify(to = str(self.employee.contact), from_ = phone_number, body="Your Leave submitted on" + str(self.submit_date) + "was disapproved.")
+				self.notify(to = self.employee, body = "Your Leave submitted on" + str(self.submit_date) + "was disapproved.")
 			else:
 				pass
 		else:
@@ -163,5 +162,5 @@ class LeaveRecord(models.Model):
 					d2 	= leave_record.from_date
 					e1 	= self.from_date
 					e2 	= self.to_date
-			# self.notify(to =str(employee.contact), from_ = phone_number, body="New Leave Request. Log in to Leave Management System to see details.")
+			self.notify(to = self.employee, body="New Leave Request. Log in to Leave Management System to see details.")
 		super(LeaveRecord, self).save()
