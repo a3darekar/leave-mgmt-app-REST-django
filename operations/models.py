@@ -33,7 +33,7 @@ class Department(models.Model):
 class Employee(models.Model):
 	user 		= models.OneToOneField(User, help_text="Create a new user to add as an employee. This would be used as login credentials.", related_name="employee")
 	email 		= models.EmailField(('email address'), unique=True)
-	department 	= models.OneToOneField(Department, help_text="Assingn Department (or project to user, The Dept Head defined in Department Table would be the person managing the records of specific employee.")
+	department 	= models.ForeignKey(Department, help_text="Assingn Department (or project to user, The Dept Head defined in Department Table would be the person managing the records of specific employee.")
 	first_name 	= models.CharField(('first name'), max_length=30, blank=True)
 	last_name 	= models.CharField(('last name'), max_length=30, blank=True)
 	designation = models.CharField(max_length = 60)
