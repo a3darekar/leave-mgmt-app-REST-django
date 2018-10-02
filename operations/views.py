@@ -5,11 +5,13 @@ from django.contrib.auth.decorators import login_required
 from .models import *
 from .forms import LeaveRecordForm
 from .models import Employee
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from datetime import date, timedelta
+from dateutil import parser
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
 from .serializers import EmployeeSerializer
+from fcm_django.models import FCMDevice
 import json
 
 @csrf_exempt
@@ -21,27 +23,130 @@ def webhook(request):
 	except AttributeError:
 		return 'json error'
 	print action
-	if action == 'leave.apply':
-		webhook_apply(req)
-	devices = FCMDevice.objects.all()
-	print devices
-	for device in devices:
-		body = device.name + " :- " + device.device_id
-		device.send_message(title="Leave Attempted!", body=body)
+	if action == 'leave_apply':
+		res = webhook_apply(req)
+	print('Action: ' + action)
+	print('Response: ' + res)
 
-	# print('Action: ' + action)
-	# print('Response: ' + res)
-
-	
-
-	return HttpResponse(jsonify({'fulfillmentText': res}))
+	return JsonResponse({'fulfillmentText': res})
 
 
 def webhook_apply(request):
-	error, parameters = validate_params(req['queryResult']['parameters'])
+	error, parameters = validate_params(request['queryResult']['parameters'])
 	if error:
 		return error
+	else:
+		print parameters
+		employee 	= Employee.objects.get(email = parameters['email'])
+		reason 		= parameters['reason']
+		from_date 	= parameters['startDate']
+		to_date 	= parameters['endDate']
+		leave_record = LeaveRecord(employee = employee, reason = reason, from_date = from_date, to_date = to_date)
+		leave_record.save()
+		return "I Applied your Leave"
 
+def validate_params(parameters):
+	"""Takes a list of parameters from a HTTP request and validates them
+	Returns a string of errors (or empty string) and a list of params
+	"""
+
+	# Initialize error and params
+	error_response = ''
+	params = {}
+
+	datetime_input = parameters.get('period')
+	print type(datetime_input), datetime_input
+	if isinstance(datetime_input, (dict)):
+		startDate, endDate = parse_datetime_input(datetime_input)
+		params['startDate'] = parser.parse(startDate).date()
+		params['endDate'] = parser.parse(endDate).date()
+	else:
+		params['startDate'] = parser.parse(datetime_input).date()
+		params['endDate'] = parser.parse(datetime_input).date()
+
+	print params['startDate'], type(params['startDate'])
+	print params['endDate'], type(params['endDate'])
+	
+	params['reason'] = parameters.get('reason')
+
+	params['email'] = parameters.get('email')
+
+	print params['email'], type(params['email'].lower)
+	print params['reason'], type(params['reason'])
+	if params['reason'] == "No" or "no":
+		params['reason'] = "None"
+
+	return error_response.strip(), params
+
+
+def parse_datetime_input(datetime_input):
+	"""Takes a string containing date/time and intervals in ISO-8601 format
+	Returns a start and end Python datetime object
+	datetimes are None if the string is not a date/time
+	endDate is None if the string is not a date/time interval
+	"""
+
+	# Date time
+	# If the string is length 8 datetime_input has the form 17:30:00
+	if len(datetime_input) == 8:
+		# if only the time is provided assume its for the current date
+		current_date = dt.now().strftime('%Y-%m-%dT')
+
+		startDate = dt.strptime(
+			current_date + datetime_input,
+			'%Y-%m-%dT%H:%M:%S')
+		endDate = None
+	# If the string is length 10 datetime_input has the form 2014-08-09
+	elif len(datetime_input) == 10:
+		startDate = dt.strptime(datetime_input, '%Y-%m-%d').date()
+		endDate = None
+	# If the string is length 20 datetime_input has the form
+	# 2014-08-09T16:30:00Z
+	elif len(datetime_input) == 20:
+		startDate = dt.strptime(datetime_input, '%Y-%m-%dT%H:%M:%SZ')
+		endDate = None
+
+	# Date Periods
+	# If the string is length 17 datetime_input has the form
+	# 13:30:00/14:30:00
+	elif len(datetime_input) == 17:
+		# if only the time is provided assume its for the current date
+		current_date = dt.now().strftime('%Y-%m-%dT')
+
+		# Split date into start and end times
+		datetime_input_start = datetime_input.split('/')[0]
+		datetime_input_end = datetime_input.split('/')[1]
+
+		startDate = dt.strptime(
+			current_date + datetime_input_start, '%Y-%m-%dT%H:%M:%S')
+		endDate = dt.strptime(
+			current_date + datetime_input_end, '%Y-%m-%dT%H:%M:%S')
+	# If the string is length 21 datetime_input has the form
+	# 2014-01-01/2014-12-31
+	elif len(datetime_input) == 21:
+		# Split date into start and end times
+		datetime_input_start = datetime_input.split('/')[0]
+		datetime_input_end = datetime_input.split('/')[1]
+
+		startDate = dt.strptime(
+			datetime_input_start, '%Y-%m-%d').date()
+		endDate = dt.strptime(datetime_input_end, '%Y-%m-%d').date()
+	# If the string is length 41 datetime_input has the form
+	# 2017-02-08T08:00:00Z/2017-02-08T12:00:00Z
+	elif len(datetime_input) == 41:
+		# Split date into start and end times
+		datetime_input_start = datetime_input.split('/')[0]
+		datetime_input_end = datetime_input.split('/')[1]
+
+		startDate = dt.strptime(
+			datetime_input_start, '%Y-%m-%dT%H:%M:%SZ')
+		endDate = dt.strptime(
+			datetime_input_end, '%Y-%m-%dT%H:%M:%SZ')
+	else:
+		startDate = None
+		endDate = None
+
+	return startDate, endDate
 
 @login_required
 def home(request):

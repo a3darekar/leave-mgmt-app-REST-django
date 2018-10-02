@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 from django.utils import six, timezone
 from .choices import LeaveType, Status
 from datetime import datetime, timedelta
+from fcm_django.models import FCMDevice
+
 import pytz
 # from .twillio import *
 from django.db import models
@@ -140,7 +142,8 @@ class LeaveRecord(models.Model):
 					self.days_of_lave_taken -=1
 
 			user = get_current_authenticated_user()
-			self.employee = Employee.objects.get(user = user)
+			if not self.employee:
+				self.employee = Employee.objects.get(user = user)
 			available_leaves 			= LeavesRemain.objects.filter(employee= self.employee, leavetype = 'Casual').first().count
 			if available_leaves > 0 and available_leaves > self.days_of_lave_taken :
 				self.leavetype 		= 'Casual'
