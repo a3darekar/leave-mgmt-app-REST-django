@@ -73,8 +73,6 @@ def validate_params(parameters):
 
 	print params['email'], type(params['email'].lower)
 	print params['reason'], type(params['reason'])
-	if params['reason'] == "No" or "no":
-		params['reason'] = "None"
 
 	return error_response.strip(), params
 

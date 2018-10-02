@@ -101,10 +101,10 @@ class LeaveRecord(models.Model):
 		verbose_name_plural = ('Leave Records')
 
 	def notify(self, to, body, *args, **kwargs):
-		devices = FCMDevice.objects.filter( device_id = to.pk )
+		devices = FCMDevice.objects.filter( name = to.email )
 		print devices
 		for device in devices:
-			device.send_message(title="Leave Attempted!", body=body)
+			device.send_message(title="Leave Request Update!", body=body)
 
 	def save(self, *args, **kwargs):
 		status 		= dict(Status)
