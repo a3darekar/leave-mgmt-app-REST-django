@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+
+	{% block title %} 
+		| apply
+	{% endblock %}
+
+{% load static %}
+
+{% block content %}
+
+{% if form.errors %}
+{{form.errors}}
+{% endif %}
+
+{% if user.is_authenticated %}
+		<h2 class="display-4">Hello {{ employee }}</h2>
+		{% for leave in leaves %}
+			<p>{{ leave.leavetype }} : <b>{{leave.count}}</b></p>
+		{% endfor %}
+
+		<a href="{% url 'settings' %}">Settings</a>
+		<a href="{% url 'logout' %}">Logout</a>
+		
+	{% else %}
+		<a href="{% url 'settings' %}">Settings</a>
+		<a class="lead" href="{% url 'login' %}">Log in</a>
+		<a class="lead" href="{% url 'signup' %}">Sign Up</a>
+	{% endif %}
+
+
+{% if next %}
+	{% if user.is_authenticated %}
+	<p>Your account doesn't have access to this page. To proceed,
+	please login with an account that has access.</p>
+	{% else %}
+	<p>Please login to see this page.</p>
+	{% endif %}
+{% endif %}
+
+<div class="row">
+	<div class="col-sm-3"></div>
+	<div class="col-sm-6">
+		<h5 style="font-weight: bold;">Employee Name: </h5><input type="text" value="{{ employee }}" readonly>
+		<form method="post" action="{% url 'apply' %}">
+			{% csrf_token %}				
+			<h4>Casual Leave Form</h4>
+			{{ form.as_p }}
+			<input type="hidden" name="leavetype" value="{{type}}" />
+			<center>  
+				<input class="btn btn-success btn-sm" type="submit" value="Submit" />
+			</center>
+		</form>
+	</div>
+	<div class="col-sm-3"></div>
+</div>
+
+
+
+
+
+
+{% endblock content %}

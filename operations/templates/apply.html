@@ -6,6 +6,45 @@
 
 {% load static %}
 
+{% block nav-list %}
+{% if user.is_authenticated %}
+	{% if employee %}
+		<li>
+			<a href="{% url 'apply' %}">Apply</a>
+		</li>
+		{% if department_head %}
+		<li>
+			<a href="{% url 'approve' %}">Approve Leaves</a>
+		</li>
+		{% endif %}
+	{% endif %}
+		<li>
+			<a href="{% url 'settings' %}">Settings</a>
+		</li>
+{% endif %}
+{% endblock %}
+
+{% block side-nav %}
+{% if user.is_authenticated %}
+	{% if employee %}
+		<li>
+			<a href="{% url 'apply' %}">Apply</a>
+		</li>
+		{% if department_head %}
+		<li>
+			<a href="{% url 'approve' %}">Approve Leaves</a>
+		</li>
+		{% endif %}
+	{% endif %}
+		<li>
+			<a href="{% url 'settings' %}">Settings</a>
+		</li>
+		<li>
+			<a href="{% url 'logout' %}">Logout</a>
+		</li>
+
+{% endif %}
+{% endblock %}
 {% block content %}
 
 {% if form.errors %}
@@ -13,37 +52,28 @@
 {% endif %}
 
 {% if user.is_authenticated %}
-		<h2 class="display-4">Hello {{ employee }}</h2>
-		{% for leave in leaves %}
-			<p>{{ leave.leavetype }} : <b>{{leave.count}}</b></p>
-		{% endfor %}
-
-		<a href="{% url 'settings' %}">Settings</a>
-		<a href="{% url 'logout' %}">Logout</a>
-		
-	{% else %}
-		<a href="{% url 'settings' %}">Settings</a>
-		<a class="lead" href="{% url 'login' %}">Log in</a>
-		<a class="lead" href="{% url 'signup' %}">Sign Up</a>
-	{% endif %}
-
-
-{% if next %}
-	{% if user.is_authenticated %}
+	{% if not employee %}
 	<p>Your account doesn't have access to this page. To proceed,
 	please login with an account that has access.</p>
 	{% else %}
-	<p>Please login to see this page.</p>
-	{% endif %}
+	
+	<h2 class="display-4">	Leave Form</h2>
 {% endif %}
-<form method="post" action="{% url 'apply' %}">
-	{% csrf_token %}				
-	<h4>Casual Leave Form</h4>
-	{{ form.as_p }}
-						<center>  
-							<input type="hidden" name="leavetype" value="{{type}}" />
-							<input class="btn btn-success btn-sm" type="submit" value="Submit" />
-						</center>
+<div class="row">
+	<div class="col-sm-3"></div>
+	<div class="col-sm-6">
+		<h5 style="font-weight: bold;">Employee Name: </h5><input type="text" value="{{ employee }}" readonly>
+		<form method="post" action="{% url 'apply' %}">
+			{% csrf_token %}
+			{{ form.as_p }}
+				<input type="hidden" name="leavetype" value="{{type}}" />
+			<center>  
+				<input class="btn btn-success btn-sm" type="submit" value="Submit" />
+			</center>	
+		</form>
+	</div>
+	<div class="col-sm-3"></div>
+</div>
 
 
 {% if leave_records %}
@@ -56,6 +86,7 @@
 		<th class="th-border" colspan="3" style="text-align : center" >Description </th>
 		<th class="th-border" rowspan="2" style="text-align : center" scope="row">Reason</th>
 		<th class="th-border" rowspan="2" style="text-align : center" scope="row">Status</th>
+		<th class="th-border" rowspan="2" style="text-align : center" scope="row">Action</th>
 	</tr>
 		
 	<tr>
@@ -72,6 +103,19 @@
 			<td class="td-border">{{ leave_record.days_of_lave_taken }}</td>
 			<td class="td-border">{{ leave_record.reason }}</td>
 			<td class="td-border">{{ leave_record.status }}</td>
+			<td class="td-border">
+				{% if leave_record.status != 'Pending' %}
+				<button type="button" class="btn btn-default btn-sm btn-danger disabled ">
+					<span class="glyphicon glyphicon-pencil"></span> Edit 
+    			</button>
+			  	{% else %} 
+				<a href="{% url 'update' leave_record.id %}">
+					<button type="button" class="btn btn-default btn-sm btn-primary">
+	          			<span class="glyphicon glyphicon-pencil"></span> Edit 
+	        		</button>
+        		</a>
+        		{% endif%}
+    		</td>
 		</tr>
 
 		{% endfor %}
@@ -79,5 +123,8 @@
 <hr>
 
 {% endif %}
+
+{% endif %}
+
 
 {% endblock content %}

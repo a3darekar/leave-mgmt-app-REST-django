@@ -136,6 +136,12 @@ class LeaveRecord(models.Model):
 				pass
 		else:
 			self.status = status['pending']
+			if self.to_date < self.from_date:
+				print "swapping"
+				temp 			= self.to_date
+				self.to_date 	= self.from_date
+				self.from_date 	= temp
+
 			self.days_of_lave_taken = (self.to_date - self.from_date).days + 1
 			for lday in range(self.days_of_lave_taken):
 				if (self.from_date + timedelta(days=lday)).weekday() == 6:

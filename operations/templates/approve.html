@@ -30,6 +30,7 @@
 <table class="table table-border center tr-hower">
 	<tr class="tr-border">
 		<th class="th-border" rowspan="2" style="text-align : center" scope="row">Id</th>
+		<th class="th-border" rowspan="2" style="text-align : center" scope="row">Employee</th>
 		<th class="th-border" colspan="3" style="text-align : center" >Description </th>
 		<th class="th-border" rowspan="2" style="text-align : center" scope="row">Reason</th>
 		<th class="th-border" rowspan="2" style="text-align : center" scope="row">Status</th>
@@ -45,6 +46,7 @@
 		
 		<tr class="tr-border" {% if leave_record.excess is True %} bgcolor="#999999" {% endif %}> 
 			<td class="td-border">{{ forloop.counter }}</td>
+			<td class="td-border">{{ leave_record.employee }}</td>
 			<td class="td-border">{{ leave_record.from_date }}</td>
 			<td class="td-border">{{ leave_record.to_date }}</td>
 			<td class="td-border">{{ leave_record.days_of_lave_taken }}</td>

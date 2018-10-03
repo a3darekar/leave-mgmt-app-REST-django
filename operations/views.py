@@ -150,8 +150,9 @@ def parse_datetime_input(datetime_input):
 def home(request):
 	try:
 		emp = Employee.objects.get(user = request.user)
+		department_head = Department.objects.filter(head = request.user)
 		leaves = LeavesRemain.objects.filter(employee = emp)
-		context = {'emp' : emp, 'leaves' : leaves, 'user': request.user}
+		context = {'emp' : emp, 'leaves' : leaves, 'department_head': department_head, 'user': request.user}
 	except Employee.DoesNotExist:
 		return render(request, "403.html", status=403)
 	return render(request, 'home.html', context)
@@ -193,7 +194,8 @@ def approve(request):
 				for leave_entry in leave_entries:
 					leave_records.append(leave_entry)
 			employees.append(employee)
-	context = {'leave_records' : leave_records, 'emp' : emp, 'notification' : notification, 'notification_status' : notification_status }
+	department_head = Department.objects.filter(head = request.user)
+	context = {'leave_records' : leave_records, 'emp' : emp, 'department_head': department_head, 'notification' : notification, 'notification_status' : notification_status }
 	return render(request,"approve.html", context)
 
 @login_required
@@ -237,8 +239,26 @@ def apply(request):
 				notification = "Leave Form Submitted"
 			notification_status = -1
 
+	department_head = Department.objects.filter(head = request.user)
 	leaves = LeavesRemain.objects.filter(employee = employee)
 	leave_records = LeaveRecord.objects.filter(employee = employee).order_by('-submit_date')
 	form = LeaveRecordForm()
-	context = {'employee' : employee, 'leaves' : leaves, 'user': request.user, 'leave_records': leave_records, 'form' : form}
+	context = {'employee' : employee, 'leaves' : leaves, 'department_head': department_head, 'user': request.user, 'leave_records': leave_records, 'form' : form}
 	return render(request, "apply.html", context)
+
+
+def update(request, id):
+	employee 	= Employee.objects.get(user = request.user)
+	instance 	= LeaveRecord.objects.get(id=id)
+	if instance.employee == employee and instance.status <> 'Approved':
+		form 		= LeaveRecordForm(request.POST or None, instance=instance)
+		if request.method == "POST":
+			if form.is_valid():
+				edited_instance = form.save()
+				print edited_instance
+			return redirect('/apply/')
+		department_head = Department.objects.filter(head = request.user)
+		context 	= {'employee' : employee, 'department_head': department_head, 'user': request.user, 'form' : form}
+		return render(request, "update.html", context)
+	else:
+		return redirect('/apply/')

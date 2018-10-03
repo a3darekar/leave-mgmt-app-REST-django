@@ -7,8 +7,7 @@
 {% endblock %}
 
 {% block css %}
-
-	<link rel="stylesheet" href="{% static 'css/default.css' %}">
+	<link rel="stylesheet" href="{% static 'css/social_btn.css' %}">
 {% endblock %}
 
 
@@ -39,7 +38,7 @@
 		<label>
 			<a href="{% url 'social:begin' 'google-oauth2' %}">
 				<button class="loginBtn loginBtn--google">
-						Login with Google
+					Login with Google
 				</button>
 			</a>
 		</label>
@@ -62,10 +61,9 @@
 		{% endif %}
 
 	{% else %}
-		<label>
 			<a href="{% url 'social:begin' 'facebook' %}">
 				<button class="loginBtn loginBtn--facebook">
-						Login with Facebook
+					Login with Facebook
 				</button>
 			</a>
 		</label>
