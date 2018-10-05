@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.shortcuts import render, redirect
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.views.generic import ListView
 from django.contrib.auth.decorators import login_required
 from .models import *
-from .forms import LeaveRecordForm
+from .forms import LeaveRecordForm, EmployeeForm
 from .models import Employee
 from django.http import HttpResponse, JsonResponse
 from datetime import date, timedelta
 from dateutil import parser
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
-from .serializers import EmployeeSerializer
 from fcm_django.models import FCMDevice
+from django.core.urlresolvers import reverse_lazy
 import json
 
 @csrf_exempt
@@ -145,6 +147,36 @@ def parse_datetime_input(datetime_input):
 		endDate = None
 
 	return startDate, endDate
+ 
+class EmployeeList(ListView):
+    context_object_name = 'employee_list'
+    template_name = 'operattions/employee_list.html'
+
+    def get_queryset(self):
+        return Employee.objects.all()
+
+class EmployeeDelete(DeleteView):
+    model = Employee
+    success_url = reverse_lazy('employee-list')
+
+@login_required
+def employees(request, pk = None):
+	employee = Employee.objects.get(user = request.user)
+	employees = Employee.objects.all()
+	instance = Employee.objects.filter(id = pk).first()
+	if request.user.is_superuser:
+		form = EmployeeForm(request.POST or None, instance=instance)
+		if instance is not None:
+			form.fields['user'].widget.attrs['readonly'] = True
+		if request.method == "POST":
+			if form.is_valid():
+				instance = form.save()
+				return redirect(reverse_lazy('employee-list'))
+	else:
+		error = "Your account doesn't have access to this page. To proceed, please login with an account that has access."
+		return render(request, "403.html", { 'error' : error,})	
+	context = { 'employee' : employee, 'employees' : employees, 'form': form, 'instance': instance, 'user': request.user}
+	return render(request, "employee.html", context)
 
 @login_required
 def home(request):
@@ -154,8 +186,22 @@ def home(request):
 		leaves = LeavesRemain.objects.filter(employee = emp)
 		context = {'emp' : emp, 'leaves' : leaves, 'department_head': department_head, 'user': request.user}
 	except Employee.DoesNotExist:
-		return render(request, "403.html", status=403)
+		error = "It appears that you are not connected to the Leave Management application. Please Contact Administrator to Setup your account."
+		return render(request, "403.html", { 'error' : error,})
 	return render(request, 'home.html', context)
+
+@login_required
+def delete(request,id=None):
+    object = LeaveRecord.objects.get(id=id)
+    object.delete()
+    return redirect('/apply/')
+
+
+@login_required
+def employees_delete(request,id=None):
+    object = Employee.objects.get(id=id)
+    object.delete()
+    return redirect('/employees/')
 
 @login_required
 def approve(request):
@@ -165,9 +211,11 @@ def approve(request):
 		emp 	= Employee.objects.get(user = request.user)
 		dept 	= Department.objects.filter(head=emp.user)
 	except Employee.DoesNotExist:
-		return render(request, "403.html")
+		error = "It appears that you are not connected to the Leave Management application. Please Contact Administrator to Setup your account."
+		return render(request, "403.html", { 'error' : error,})
 	except Department.DoesNotExist:
-		return render(request, "403.html")
+		error = "It appears that you are not connected to the Leave Management application. Please Contact Administrator to Setup your account."
+		return render(request, "403.html", { 'error' : error,})
 	notification = -1
 	notification_status = -1
 	status 		= dict(Status)
@@ -241,7 +289,7 @@ def apply(request):
 
 	department_head = Department.objects.filter(head = request.user)
 	leaves = LeavesRemain.objects.filter(employee = employee)
-	leave_records = LeaveRecord.objects.filter(employee = employee).order_by('-submit_date')
+	leave_records = LeaveRecord.objects.filter(employee = employee).order_by('-submit_date').order_by('-status')
 	form = LeaveRecordForm()
 	context = {'employee' : employee, 'leaves' : leaves, 'department_head': department_head, 'user': request.user, 'leave_records': leave_records, 'form' : form}
 	return render(request, "apply.html", context)

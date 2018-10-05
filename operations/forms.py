@@ -12,3 +12,9 @@ class LeaveRecordForm(ModelForm):
 	class Meta:
 		model = LeaveRecord
 		fields = ('reason', 'from_date', 'to_date')
+
+class EmployeeForm(ModelForm):
+	
+	class Meta:
+		model = Employee
+		fields = ('user', 'email', 'department', 'first_name', 'last_name', 'designation', 'contact')

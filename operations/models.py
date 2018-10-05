@@ -6,7 +6,7 @@ from django.utils import six, timezone
 from .choices import LeaveType, Status
 from datetime import datetime, timedelta
 from fcm_django.models import FCMDevice
-
+from django.urls import reverse
 import pytz
 # from .twillio import *
 from django.db import models
@@ -73,6 +73,9 @@ class Employee(models.Model):
 		Sends an email to this User.
 		"""
 		send_mail(subject, message, from_email, [self.email], **kwargs)
+
+	def get_absolute_url(self):
+		return reverse('employee-list')
 
 
 class LeavesRemain(models.Model):
@@ -157,19 +160,18 @@ class LeaveRecord(models.Model):
 				self.leavetype 		= 'Excess'	
 			leaves_records	= LeaveRecord.objects.filter(employee = self.employee, status = 'Approved')
 			utc = pytz.utc
-			print type(self.from_date),type(self.to_date),self.reason
 			if isinstance(self.from_date, datetime) :
-				self.from_date  = utc.localize(self.from_date)
+				self.from_date = utc.localize(self.from_date)
 				self.from_date = self.from_date.date()
 
 			if isinstance(self.to_date, datetime) :
-				self.to_date  = utc.localize(self.to_date)
+				self.to_date = utc.localize(self.to_date)
 				self.to_date = self.to_date.date()
 				
 			for leave_record in leaves_records:
-					d1 	= leave_record.to_date
-					d2 	= leave_record.from_date
-					e1 	= self.from_date
-					e2 	= self.to_date
+				d1 	= leave_record.to_date
+				d2 	= leave_record.from_date
+				e1 	= self.from_date
+				e2 	= self.to_date
 			self.notify(to = self.employee, body="New Leave Request. Log in to Leave Management System to see details.")
 		super(LeaveRecord, self).save()
