@@ -67,6 +67,18 @@ class LeaveRecordViewSet(viewsets.ModelViewSet):
 		else:
 			return LeaveRecord.objects.none()
 
+
+	def update(self, request, *args, **kwargs):
+		instance = self.get_object()
+		instance.status = request.data.get("status")
+		instance.save()
+		
+		serializer = LeaveRecordSerializer(data=instance)
+		if serializer.is_valid():
+			self.perform_update(serializer)
+		
+		return Response(serializer.data)
+
 router = DefaultRouter()
 router.register(r'leaves', LeavesRemainViewSet, base_name='leaves_remain_rest')
 router.register(r'emps', LeavesRemainViewSet, base_name='employees')
