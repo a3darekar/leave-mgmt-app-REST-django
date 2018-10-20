@@ -63,6 +63,8 @@ class LeaveRecordViewSet(viewsets.ModelViewSet):
 			employee = Employee.objects.filter(user = user)
 			if self.request.query_params.get('status') == 'pending':
 				return LeaveRecord.objects.filter(employee = employee).filter(status = 'pending') | LeaveRecord.objects.filter(employee = employee).filter(status = 'Pending')
+			if self.request.query_params.get('status') == 'approved':
+				return LeaveRecord.objects.filter(employee = employee).filter(status = 'approved') | LeaveRecord.objects.filter(employee = employee).filter(status = 'Approved')
 			return LeaveRecord.objects.filter(employee = employee)
 		else:
 			return LeaveRecord.objects.none()
