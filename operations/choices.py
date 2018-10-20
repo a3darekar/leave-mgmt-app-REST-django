@@ -1,5 +1,6 @@
 LeaveType = (
 	('casual', 'Casual'),
+	('medical', 'Medical'),
 	('excess', 'Excess'),
 )
 

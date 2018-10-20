@@ -47,7 +47,7 @@ class LeaveRecordSerializer(ModelSerializer):
 	class Meta:
 		model = LeaveRecord
 		fields = ('id', 'employee', 'leavetype', 'status', 'reason', 'from_date', 'to_date', 'days_of_lave_taken', 'submit_date', 'excess')
-		read_only_fields = ('employee','status', 'leavetype', 'excess')
+		read_only_fields = ('employee', 'leavetype', 'status', 'excess')
 
 
 class LeaveRecordViewSet(viewsets.ModelViewSet):
@@ -61,6 +61,11 @@ class LeaveRecordViewSet(viewsets.ModelViewSet):
 		user = self.request.user
 		if user.is_authenticated:
 			employee = Employee.objects.filter(user = user)
+			if self.request.query_params.get('task') == 'approve':
+				department = Department.objects.filter(head = user)
+				employees = Employee.objects.filter(department = department)
+				print department, employees
+				return LeaveRecord.objects.filter(employee__in = employees).filter(status = 'pending') | LeaveRecord.objects.filter(employee__in = employees).filter(status = 'Pending')
 			if self.request.query_params.get('status') == 'pending':
 				return LeaveRecord.objects.filter(employee = employee).filter(status = 'pending') | LeaveRecord.objects.filter(employee = employee).filter(status = 'Pending')
 			if self.request.query_params.get('status') == 'approved':

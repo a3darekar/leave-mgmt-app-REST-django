@@ -50,6 +50,8 @@ class Employee(models.Model):
 			leavetype = dict(LeaveType)
 			l = LeavesRemain(employee = self, leavetype = leavetype['excess'], count = 0)
 			l.save()
+			l = LeavesRemain(employee = self, leavetype = leavetype['medical'], count = 10)
+			l.save()
 			l = LeavesRemain(employee = self, leavetype = leavetype['casual'], count = 15)
 			l.save()
 		return self
@@ -139,22 +141,6 @@ class LeaveRecord(models.Model):
 				pass
 		else:
 			self.status = status['pending']
-			self.days_of_lave_taken = (self.to_date - self.from_date).days + 1
-			for lday in range(self.days_of_lave_taken):
-				if (self.from_date + timedelta(days=lday)).weekday() == 6:
-					self.days_of_lave_taken -=1
-
-			user = get_current_authenticated_user()
-			if user is not None:
-				if not self.employee:
-					self.employee = Employee.objects.get(user = user)
-			available_leaves 			= LeavesRemain.objects.filter(employee= self.employee, leavetype = 'Casual').first().count
-			if available_leaves > 0 and available_leaves > self.days_of_lave_taken :
-				self.leavetype 		= 'Casual'
-			else:
-				self.leavetype 		= 'Excess'	
-			leaves_records	= LeaveRecord.objects.filter(employee = self.employee, status = 'Approved')
-			utc = pytz.utc
 			if isinstance(self.from_date, datetime) :
 				self.from_date = utc.localize(self.from_date)
 				self.from_date = self.from_date.date()
@@ -163,6 +149,22 @@ class LeaveRecord(models.Model):
 				self.to_date = utc.localize(self.to_date)
 				self.to_date = self.to_date.date()
 				
+			self.days_of_lave_taken = (self.to_date - self.from_date).days + 1
+			for lday in range(self.days_of_lave_taken):
+				if (self.from_date + timedelta(days=lday)).weekday() == 6:
+					self.days_of_lave_taken -=1
+
+			user = get_current_authenticated_user()
+			if user is not None:
+					self.employee = Employee.objects.get(user = user)
+			available_leaves 			= LeavesRemain.objects.filter(employee= self.employee, leavetype = 'Casual').first().count
+			if available_leaves > 0 and available_leaves > self.days_of_lave_taken :
+				self.leavetype 		= 'Casual'
+			else:
+				self.leavetype 		= 'Excess'	
+			leaves_records	= LeaveRecord.objects.filter(employee = self.employee, status = 'Approved')
+			utc = pytz.utc
+			
 			for leave_record in leaves_records:
 				d1 	= leave_record.to_date
 				d2 	= leave_record.from_date
